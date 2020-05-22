@@ -15,17 +15,21 @@ async fn main() -> Result<(), Error> {
         let update = update?;
         if let UpdateKind::Message(message) = update.kind {
             if let MessageKind::Text { ref data, .. } = message.kind {
-                // Print received text message to stdout.
-                println!("<{}>: {}", &message.from.first_name, data);
+                if data == "/start" {
+                    api.send(message.text_reply(start_message())).await?;
+                }
 
-                // Answer message with "Hi".
-                api.send(message.text_reply(format!(
-                    "Hi, {}! You just wrote '{}'",
-                    &message.from.first_name, data
-                )))
-                    .await?;
+                api.send(message.text_reply(create_response(data))).await?;
             }
         }
     }
     Ok(())
+}
+
+fn start_message() -> String {
+    "Welcome, and let's go deeper to Rust. It's Rust Playground Bot. You can check your little piece of Rust code, sending it to me.".to_string()
+}
+
+fn create_response(data: &str) -> String {
+    format!("Hi! You just wrote '{}'", data)
 }
