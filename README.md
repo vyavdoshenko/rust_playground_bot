@@ -1,1 +1,1 @@
-# rust_playground_bot
+# Telegram bot for using Rust playground.
