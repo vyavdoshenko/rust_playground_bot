@@ -10,3 +10,7 @@ edition = "2018"
 telegram-bot = "0.7"
 tokio = { version = "0.2", features = ["full"]}
 futures = "0.3"
+hyper-rustls = "0.20"
+hyper = "0.13"
+serde_json = "1.0"
+serde = "1.0"
