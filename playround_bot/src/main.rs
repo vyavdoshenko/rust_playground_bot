@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
             if let UpdateKind::Message(message) = update.kind {
                 if let MessageKind::Text { ref data, .. } = message.kind {
                     if data == "/start" {
-                        api.send(message.text_reply(get_start_message().await)).await?;
+                        api.send(message.text_reply(get_start_message())).await?;
                     } else {
                         api.send(message.text_reply(create_response(data).await)).await?;
                     }
@@ -31,19 +31,20 @@ async fn main() -> Result<()> {
     }
 }
 
-async fn get_start_message() -> String {
+fn get_start_message() -> String {
     "Welcome! Let's go deeper to Rust. It's Rust Playground Bot. You can check some piece of your Rust code, sending it to me.".to_string()
 }
 
+#[allow(non_snake_case)]
 #[derive(Serialize)]
-pub struct PlaygroundRequest {
+struct PlaygroundRequest {
+    backtrace: bool,
+    channel: String,
     code: String,
-    version: String,
-    optimize: String,
-    test: bool,
-    separate_output: bool,
-    color: bool,
-    backtrace: String,
+    crateType: String,
+    edition: String,
+    mode: String,
+    tests: bool,
 }
 
 async fn create_response(data: &str) -> String {
@@ -51,20 +52,20 @@ async fn create_response(data: &str) -> String {
     let client = hyper::Client::builder().build(connector);
 
     let playground_request = serde_json::to_string(&PlaygroundRequest {
+        backtrace: false,
+        channel: String::from("stable"),
         code: data.to_string(),
-        version: String::from("stable"),
-        optimize: String::from("0"),
-        test: false,
-        separate_output: true,
-        color: false,
-        backtrace: String::from("0"),
+        crateType: String::from("bin"),
+        edition: String::from("2018"),
+        mode: String::from("debug"),
+        tests: false,
     }).unwrap();
 
     let req = hyper::Request::builder()
         .method("POST")
-        .uri("https://play.rust-lang.org/evaluate.json")
+        .uri("https://play.rust-lang.org/execute")
         .body(hyper::Body::from(playground_request))
-        .expect("request builder");
+        .expect("Request builder error.");
 
     let body = client.request(req).await.unwrap();
 
