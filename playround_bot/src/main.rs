@@ -61,12 +61,11 @@ async fn create_response(data: &str) -> String {
         tests: false,
     }).unwrap();
 
-    let req = hyper::Request::builder()
-        .method("POST")
-        .uri("https://play.rust-lang.org/execute")
+    let req = hyper::Request::post("https://play.rust-lang.org/execute")//("http://localhost:3000/test")
+        .header("content-type", "application/x-www-form-urlencoded")//("https://play.rust-lang.org/execute")
         .body(hyper::Body::from(playground_request))
-        .expect("Request builder error.");
-
+        .unwrap();
+    
     let body = client.request(req).await.unwrap();
 
     let bytes = hyper::body::to_bytes(body).await.unwrap();
