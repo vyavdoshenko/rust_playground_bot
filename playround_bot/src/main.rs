@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
                     if data == "/start" {
                         api.send(message.text_reply(get_start_message())).await?;
                     } else {
-                        api.send(message.text_reply(create_response(data).await)).await?;
+                        api.send(message.text_reply(create_response(data).await?)).await?;
                     }
                 }
             }
@@ -47,7 +47,7 @@ struct PlaygroundRequest {
     tests: bool,
 }
 
-async fn create_response(data: &str) -> String {
+async fn create_response(data: &str) -> Result<String> {
     let connector = HttpsConnector::new();
     let client = hyper::Client::builder().build(connector);
 
@@ -59,16 +59,14 @@ async fn create_response(data: &str) -> String {
         edition: String::from("2018"),
         mode: String::from("debug"),
         tests: false,
-    }).unwrap();
+    })?;
 
     let req = hyper::Request::post("https://play.rust-lang.org/execute")//("http://localhost:3000/test")
         .header("content-type", "application/x-www-form-urlencoded")//("https://play.rust-lang.org/execute")
-        .body(hyper::Body::from(playground_request))
-        .unwrap();
-    
-    let body = client.request(req).await.unwrap();
+        .body(hyper::Body::from(playground_request))?;
 
-    let bytes = hyper::body::to_bytes(body).await.unwrap();
+    let body = client.request(req).await?;
+    let bytes = hyper::body::to_bytes(body).await?;
 
-    std::str::from_utf8(&bytes[..]).unwrap().to_string()
+    return Ok(std::str::from_utf8(&bytes[..])?.to_string())
 }
