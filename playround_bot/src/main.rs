@@ -32,7 +32,12 @@ async fn main() -> Result<()> {
 }
 
 fn get_start_message() -> String {
-    "Welcome! Let's go deeper to Rust. It's Rust Playground Bot. You can check some piece of your Rust code, sending it to me.".to_string()
+    concat!("Welcome! Let's go deeper to Rust.\n\n",
+    "It's Rust Playground Bot.\n",
+    "You can check some pieces of your Rust code, sending it to me.\n",
+    "I will check it using Rust playground: https://play.rust-lang.org/\n\n",
+    "This Bot is an open-source project.\n",
+    "https://github.com/vyavdoshenko/rust_playground_bot").to_string()
 }
 
 #[allow(non_snake_case)]
@@ -61,12 +66,12 @@ async fn create_response(data: &str) -> Result<String> {
         tests: false,
     })?;
 
-    let req = hyper::Request::post("https://play.rust-lang.org/execute")//("http://localhost:3000/test")
-        .header("content-type", "application/x-www-form-urlencoded")//("https://play.rust-lang.org/execute")
+    let req = hyper::Request::post("https://play.rust-lang.org/execute")
+        .header("content-type", "application/x-www-form-urlencoded")
         .body(hyper::Body::from(playground_request))?;
 
     let body = client.request(req).await?;
     let bytes = hyper::body::to_bytes(body).await?;
 
-    return Ok(std::str::from_utf8(&bytes[..])?.to_string())
+    Ok(std::str::from_utf8(&bytes[..])?.to_string())
 }
