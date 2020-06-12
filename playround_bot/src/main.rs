@@ -74,6 +74,13 @@ struct PlaygroundRequest {
     tests: bool,
 }
 
+#[derive(Serialize)]
+struct PlaygroundResponse {
+    success: bool,
+    stdout: String,
+    stderr: String,
+}
+
 async fn create_response(data: &str) -> Result<String> {
     let connector = HttpsConnector::new();
     let client = hyper::Client::builder().build(connector);
@@ -94,6 +101,6 @@ async fn create_response(data: &str) -> Result<String> {
 
     let body = client.request(req).await?;
     let bytes = hyper::body::to_bytes(body).await?;
-
+    
     Ok(std::str::from_utf8(&bytes[..])?.to_string())
 }
