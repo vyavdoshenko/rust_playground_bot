@@ -8,7 +8,7 @@ use telegram_bot::*;
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() {
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
     let api = Api::new(token);
 
@@ -17,13 +17,35 @@ async fn main() -> Result<()> {
     loop {
         if let Some(update) = stream.next().await {
             // If the received update contains a new message...
-            let update = update?;
-            if let UpdateKind::Message(message) = update.kind {
-                if let MessageKind::Text { ref data, .. } = message.kind {
-                    if data == "/start" {
-                        api.send(message.text_reply(get_start_message())).await?;
-                    } else {
-                        api.send(message.text_reply(create_response(data).await?)).await?;
+            match update {
+                Err(why) => eprintln!("Receiving update error: {:?}", why),
+                Ok(update) => {
+                    if let UpdateKind::Message(message) = update.kind {
+                        if let MessageKind::Text { ref data, .. } = message.kind {
+                            let msg;
+                            if data == "/start" {
+                                msg = get_start_message();
+                            } else {
+                                match create_response(data).await {
+                                    Err(why) => {
+                                        msg = "Create response error, sorry for inconvenience".to_string();
+                                        eprintln!("Create response error: {:?}", why)
+                                    },
+                                    Ok(response_msg) => {
+                                        msg = response_msg;
+                                    }
+                                }
+                            }
+
+                            match api.send(message.text_reply(msg)).await {
+                                Err(why) => {
+                                    eprintln!("Send message error: {:?}", why)
+                                },
+                                Ok(_) => {
+                                    ()
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -67,7 +89,7 @@ async fn create_response(data: &str) -> Result<String> {
     })?;
 
     let req = hyper::Request::post("https://play.rust-lang.org/execute")
-        .header("content-type", "application/x-www-form-urlencoded")
+        .header("content-type", "application/json")
         .body(hyper::Body::from(playground_request))?;
 
     let body = client.request(req).await?;
