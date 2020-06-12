@@ -2,7 +2,7 @@ use std::env;
 
 use futures::StreamExt;
 use hyper_rustls::HttpsConnector;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use telegram_bot::*;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
@@ -74,7 +74,7 @@ struct PlaygroundRequest {
     tests: bool,
 }
 
-#[derive(Serialize)]
+#[derive(Deserialize)]
 struct PlaygroundResponse {
     success: bool,
     stdout: String,
@@ -101,6 +101,12 @@ async fn create_response(data: &str) -> Result<String> {
 
     let body = client.request(req).await?;
     let bytes = hyper::body::to_bytes(body).await?;
-    
-    Ok(std::str::from_utf8(&bytes[..])?.to_string())
+
+    let playground_response: PlaygroundResponse = serde_json::from_slice(&bytes[..])?;
+
+    if !playground_response.success {
+        return Ok("Playground returned error".to_string());
+    }
+
+    Ok(format!("stderr: {:?}\n\n stdout: {:?}", playground_response.stderr, playground_response.stdout))
 }
