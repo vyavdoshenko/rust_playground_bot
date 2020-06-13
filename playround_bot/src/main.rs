@@ -104,9 +104,12 @@ async fn create_response(data: &str) -> Result<String> {
 
     let playground_response: PlaygroundResponse = serde_json::from_slice(&bytes[..])?;
 
-    if !playground_response.success {
-        return Ok("Playground returned error".to_string());
+    let mut value ="\n---- Standard Error ----\n\n".to_string();
+    value.push_str(playground_response.stderr.as_str());
+    if playground_response.success {
+        value.push_str("\n---- Standard Output ----\n\n");
+        value.push_str(playground_response.stdout.as_str());
     }
 
-    Ok(format!("stderr: {:?}\n\n stdout: {:?}", playground_response.stderr, playground_response.stdout))
+    Ok(value)
 }
