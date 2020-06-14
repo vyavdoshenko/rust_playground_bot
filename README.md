@@ -7,7 +7,7 @@ It will check the code using Rust playground: https://play.rust-lang.org/
 
 * Create and tune bots: https://telegram.me/BotFather
 
-Supported bot's commands:
+# Supported bot's commands:
 
 Welcome message.
 ```

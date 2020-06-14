@@ -1,8 +1,9 @@
 use std::env;
+use std::str;
 
 use futures::StreamExt;
 use hyper_rustls::HttpsConnector;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use telegram_bot::*;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
@@ -22,29 +23,43 @@ async fn main() {
                 Ok(update) => {
                     if let UpdateKind::Message(message) = update.kind {
                         if let MessageKind::Text { ref data, .. } = message.kind {
-                            let msg;
-                            if data == "/start" {
-                                msg = get_start_message();
-                            } else if data == "/playground" {
-                                    msg = get_playground_url();
-                            } else if data == "/github" {
-                                msg = get_github_url();
-                            } else {
-                                match create_response(data).await {
-                                    Err(why) => {
-                                        msg = "Create response error, sorry for inconvenience".to_string();
-                                        eprintln!("Create response error: {:?}", why)
-                                    },
-                                    Ok(response_msg) => {
-                                        msg = response_msg;
+                            let user = message.from;
+                            let msg = {
+                                if data == "/start" {
+                                    get_start_message()
+                                } else if data == "/playground" {
+                                    get_playground_url()
+                                } else if data == "/github" {
+                                    get_github_url()
+                                } else if data == "/info" {
+                                    get_info(user.id)
+                                } else if data.starts_with("/version ") {
+                                    set_version(user.id, data.split("/version ").collect())
+                                } else if data.starts_with("/mode ") {
+                                    set_mode(user.id, data.split("/mode ").collect())
+                                } else if data.starts_with("/edition ") {
+                                    set_edition(user.id, data.split("/edition ").collect())
+                                } else if data.starts_with("/backtrace ") {
+                                    set_backtrace(user.id, data.split("/backtrace ").collect())
+                                } else if data.starts_with("/cargo ") {
+                                    set_build_type(user.id, data.split("/cargo ").collect())
+                                } else {
+                                    match create_response(user.id, data).await {
+                                        Err(why) => {
+                                            eprintln!("Create response error: {:?}", why);
+                                            "Create response error, sorry for inconvenience".to_string()
+                                        }
+                                        Ok(response_msg) => {
+                                            response_msg
+                                        }
                                     }
                                 }
-                            }
+                            };
 
                             match api.send(SendMessage::new(message.chat, msg)).await {
                                 Err(why) => {
                                     eprintln!("Send message error: {:?}", why)
-                                },
+                                }
                                 Ok(_) => {
                                     ()
                                 }
@@ -74,6 +89,30 @@ fn get_github_url() -> String {
     "https://github.com/vyavdoshenko/rust_playground_bot".to_string()
 }
 
+fn get_info(_user_id: UserId) -> String {
+    "".to_string()
+}
+
+fn set_version(_user_id: UserId, data: String) -> String {
+    data
+}
+
+fn set_mode(_user_id: UserId, data: String) -> String {
+    data
+}
+
+fn set_edition(_user_id: UserId, data: String) -> String {
+    data
+}
+
+fn set_backtrace(_user_id: UserId, data: String) -> String {
+    data
+}
+
+fn set_build_type(_user_id: UserId, data: String) -> String {
+    data
+}
+
 #[allow(non_snake_case)]
 #[derive(Serialize)]
 struct PlaygroundRequest {
@@ -93,7 +132,7 @@ struct PlaygroundResponse {
     stderr: String,
 }
 
-async fn create_response(data: &str) -> Result<String> {
+async fn create_response(_user_id: UserId, data: &str) -> Result<String> {
     let connector = HttpsConnector::new();
     let client = hyper::Client::builder().build(connector);
 
@@ -116,7 +155,7 @@ async fn create_response(data: &str) -> Result<String> {
 
     let playground_response: PlaygroundResponse = serde_json::from_slice(&bytes[..])?;
 
-    let mut value ="---- Standard Error ----\n\n".to_string();
+    let mut value = "---- Standard Error ----\n\n".to_string();
     value.push_str(playground_response.stderr.as_str());
     if playground_response.success {
         value.push_str("\n---- Standard Output ----\n\n");
