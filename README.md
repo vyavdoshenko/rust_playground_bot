@@ -1,4 +1,4 @@
-# Telegram bot for using Rust playground.
+## Telegram bot for using Rust playground.
 
 You can check some pieces of your Rust code, sending it to the Telegram Bot.
 It will check the code using Rust playground: https://play.rust-lang.org/
@@ -7,7 +7,7 @@ It will check the code using Rust playground: https://play.rust-lang.org/
 
 * Create and tune bots: https://telegram.me/BotFather
 
-# Supported bot's commands:
+### Supported bot's commands:
 
 Welcome message.
 ```
@@ -54,7 +54,7 @@ Get settings information.
 /info
 ```
 
-Info from Rust playground:
+#### Info from Rust playground:
 
 Build and run the code, showing the output. Equivalent to cargo run.
 ```

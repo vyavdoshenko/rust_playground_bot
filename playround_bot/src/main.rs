@@ -5,6 +5,7 @@ use futures::StreamExt;
 use hyper_rustls::HttpsConnector;
 use serde::{Deserialize, Serialize};
 use telegram_bot::*;
+use std::collections::HashMap;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
@@ -111,6 +112,13 @@ fn set_backtrace(_user_id: UserId, data: String) -> String {
 
 fn set_build_type(_user_id: UserId, data: String) -> String {
     data
+}
+
+fn get_user_data(_user_id: UserId) -> Option<PlaygroundRequest>
+{
+    let _users: HashMap<UserId, PlaygroundRequest> = HashMap::new();
+
+    None
 }
 
 #[allow(non_snake_case)]

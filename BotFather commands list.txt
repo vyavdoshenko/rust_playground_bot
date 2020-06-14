@@ -1,0 +1,9 @@
+start - Welcome message.
+playground - Get link to Rust playground service.
+github - Get link to this repository.
+version stable - Set version. Default is stable. (stable|beta|nightly)
+mode debug - Set mode. Default is debug. (debug|release)
+edition 2018 - Set edition. Default is 2018. (2018|2015)
+backtrace disabled - Set backtrace. Default is disabled. (disabled|enabled)
+cargo run - What do you want to do? Default is run. (run|build|test|asm|llvm ir|mir|wasm)
+info - Get settings information.
