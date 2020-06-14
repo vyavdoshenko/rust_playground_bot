@@ -25,6 +25,10 @@ async fn main() {
                             let msg;
                             if data == "/start" {
                                 msg = get_start_message();
+                            } else if data == "/playground" {
+                                    msg = get_playground_url();
+                            } else if data == "/github" {
+                                msg = get_github_url();
                             } else {
                                 match create_response(data).await {
                                     Err(why) => {
@@ -37,7 +41,7 @@ async fn main() {
                                 }
                             }
 
-                            match api.send(message.text_reply(msg)).await {
+                            match api.send(SendMessage::new(message.chat, msg)).await {
                                 Err(why) => {
                                     eprintln!("Send message error: {:?}", why)
                                 },
@@ -60,6 +64,14 @@ fn get_start_message() -> String {
     "I will check it using Rust playground: https://play.rust-lang.org/\n\n",
     "This Bot is an open-source project.\n",
     "https://github.com/vyavdoshenko/rust_playground_bot").to_string()
+}
+
+fn get_playground_url() -> String {
+    "https://play.rust-lang.org/".to_string()
+}
+
+fn get_github_url() -> String {
+    "https://github.com/vyavdoshenko/rust_playground_bot".to_string()
 }
 
 #[allow(non_snake_case)]
@@ -104,7 +116,7 @@ async fn create_response(data: &str) -> Result<String> {
 
     let playground_response: PlaygroundResponse = serde_json::from_slice(&bytes[..])?;
 
-    let mut value ="\n---- Standard Error ----\n\n".to_string();
+    let mut value ="---- Standard Error ----\n\n".to_string();
     value.push_str(playground_response.stderr.as_str());
     if playground_response.success {
         value.push_str("\n---- Standard Output ----\n\n");
