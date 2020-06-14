@@ -7,7 +7,7 @@ It will check the code using Rust playground: https://play.rust-lang.org/
 
 * Create and tune bots: https://telegram.me/BotFather
 
-- Supported bot's commands:
+Supported bot's commands:
 
 Welcome message.
 ```
@@ -46,29 +46,48 @@ Set backtrace. Default is disabled.
 
 What do you want to do? Default is run.
 ```
-/cargo run|build|test|asm|llvm|mir|wasm
+/cargo run|build|test|asm|llvm ir|mir|wasm
+```
+
+Get settings information.
+```
+/info
 ```
 
 Info from Rust playground:
 
-Run
 Build and run the code, showing the output. Equivalent to cargo run.
+```
+/cargo run
+```
 
-Build
 Build the code without running it. Equivalent to cargo build.
+```
+/cargo build
+```
 
-Test
 Build the code and run all the tests. Equivalent to cargo test.
+```
+/cargo test
+```
 
-ASM
 Build and show the resulting assembly code.
+```
+/cargo asm
+```
 
-LLVM IR
 Build and show the resulting LLVM IR, LLVM’s intermediate representation.
+```
+/cargo llvm ir
+```
 
-MIR
 Build and show the resulting MIR, Rust’s intermediate representation.
+```
+/cargo mir
+```
 
-WASM
 Build a WebAssembly module for web browsers, in the .WAT textual representation.
 Note: WASM currently requires using the Nightly channel, selecting this option will switch to Nightly.
+```
+/cargo wasm
+```
