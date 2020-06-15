@@ -29,19 +29,45 @@ pub fn get_info(_user_id: UserId) -> String {
 }
 
 pub fn set_version(_user_id: UserId, data: String) -> String {
-    data
+    if data.to_lowercase() == "stable" {
+        return "Stable version set.".to_string()
+    } else if data.to_lowercase() == "beta" {
+        return "Beta version set.".to_string()
+    } else if data.to_lowercase() == "nightly" {
+        return "Nightly version set.".to_string()
+    }
+
+    "Wrong version set.".to_string()
 }
 
 pub fn set_mode(_user_id: UserId, data: String) -> String {
-    data
+    if data.to_lowercase() == "debug" {
+        return "Debug mode set.".to_string()
+    } else if data.to_lowercase() == "release" {
+        return "Release mode set.".to_string()
+    }
+
+    "Wrong mode set.".to_string()
 }
 
 pub fn set_edition(_user_id: UserId, data: String) -> String {
-    data
+    if data == "2018" {
+        return "2018 edition set.".to_string()
+    } else if data == "2015" {
+        return "2015 edition set.".to_string()
+    }
+
+    "Wrong edition set.".to_string()
 }
 
 pub fn set_backtrace(_user_id: UserId, data: String) -> String {
-    data
+    if data.to_lowercase() == "disabled" {
+        return "Disabled backtrace set.".to_string()
+    } else if data.to_lowercase() == "enabled" {
+        return "Enabled backtrace set.".to_string()
+    }
+
+    "Wrong backtrace set.".to_string()
 }
 
 pub fn set_build_type(_user_id: UserId, data: String) -> String {
