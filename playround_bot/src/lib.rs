@@ -73,8 +73,33 @@ pub fn get_github_url() -> String {
     "https://github.com/vyavdoshenko/rust_playground_bot".to_string()
 }
 
-pub fn get_info(_user_id: UserId) -> String {
-    "".to_string()
+pub fn get_info(user_id: UserId, users: &Users) -> String {
+    let data = get_user_data(user_id, users);
+
+    let mut value = "Backtrace: ".to_string();
+    if data.backtrace {
+        value.push_str("enabled\n");
+    } else {
+        value.push_str("disabled\n");
+    }
+
+    value.push_str("Channel: ");
+    value.push_str(&data.channel);
+
+    value.push_str("\nEdition: ");
+    value.push_str(&data.edition);
+
+    value.push_str("\nMode: ");
+    value.push_str(&data.mode);
+
+    value.push_str("\nTests: ");
+    if data.tests {
+        value.push_str("enabled");
+    } else {
+        value.push_str("disabled");
+    }
+
+    value
 }
 
 pub fn set_version(_user_id: UserId, data: String) -> String {

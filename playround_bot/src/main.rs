@@ -29,7 +29,7 @@ async fn main() {
                                 } else if data == "/github" {
                                     get_github_url()
                                 } else if data == "/info" {
-                                    get_info(user.id)
+                                    get_info(user.id, &users)
                                 } else if data.starts_with("/version ") {
                                     set_version(user.id, data.split("/version ").collect())
                                 } else if data.starts_with("/mode ") {
