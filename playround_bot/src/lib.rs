@@ -4,8 +4,10 @@ use hyper_rustls::HttpsConnector;
 use serde::{Deserialize, Serialize};
 use telegram_bot::*;
 use std::collections::HashMap;
+use std::sync::Mutex;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+type Users = Mutex<HashMap<UserId, PlaygroundRequest>>;
 
 pub fn get_start_message() -> String {
     concat!("Welcome! Let's go deeper to Rust.\n\n",
@@ -71,14 +73,28 @@ pub fn set_backtrace(_user_id: UserId, data: String) -> String {
 }
 
 pub fn set_build_type(_user_id: UserId, data: String) -> String {
-    data
+    if data.to_lowercase() == "run" {
+        return "run build type set.".to_string()
+    } else if data.to_lowercase() == "build" {
+        return "build build type set.".to_string()
+    } else if data.to_lowercase() == "test" {
+        return "test build type set.".to_string()
+    } else if data.to_lowercase() == "asm" {
+        return "asm build type set.".to_string()
+    } else if data.to_lowercase() == "llvm ir" {
+        return "llvm ir build type set.".to_string()
+    } else if data.to_lowercase() == "mir" {
+        return "mir build type set.".to_string()
+    } else if data.to_lowercase() == "wasm" {
+        return "wasm build type set.".to_string()
+    }
+
+    "Wrong build type set.".to_string()
 }
 
-fn get_user_data(_user_id: UserId) -> Option<PlaygroundRequest>
+fn load_users_data(_file_path: String) -> Users
 {
-    let _users: HashMap<UserId, PlaygroundRequest> = HashMap::new();
-
-    None
+    Mutex::new(HashMap::new())
 }
 
 #[allow(non_snake_case)]
