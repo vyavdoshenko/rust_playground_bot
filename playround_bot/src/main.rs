@@ -8,6 +8,7 @@ use playround_bot::*;
 async fn main() {
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
     let api = Api::new(token);
+    let users = load_users_data("".to_string());
 
     // Fetch new updates via long poll method
     let mut stream = api.stream();
@@ -40,7 +41,7 @@ async fn main() {
                                 } else if data.starts_with("/cargo ") {
                                     set_build_type(user.id, data.split("/cargo ").collect())
                                 } else {
-                                    match create_response(user.id, data).await {
+                                    match create_response(user.id, &users, data).await {
                                         Err(why) => {
                                             eprintln!("Create response error: {:?}", why);
                                             "Create response error, sorry for inconvenience".to_string()

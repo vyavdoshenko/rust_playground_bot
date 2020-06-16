@@ -6,8 +6,55 @@ use telegram_bot::*;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
+// Private section
+
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
-type Users = Mutex<HashMap<UserId, PlaygroundRequest>>;
+
+#[derive(Deserialize)]
+struct PlaygroundResponse {
+    success: bool,
+    stdout: String,
+    stderr: String,
+}
+
+fn get_user_data(user_id: UserId, users: &Users) -> PlaygroundRequest {
+    let locker = users.lock().unwrap();
+    if locker.contains_key(&user_id) {
+        return locker.get(&user_id).unwrap().clone()
+    }
+
+    PlaygroundRequest::new()
+}
+
+// Public section
+
+pub type Users = Mutex<HashMap<UserId, PlaygroundRequest>>;
+
+#[allow(non_snake_case)]
+#[derive(Serialize, Clone)]
+pub struct PlaygroundRequest {
+    backtrace: bool,
+    channel: String,
+    code: String,
+    crateType: String,
+    edition: String,
+    mode: String,
+    tests: bool,
+}
+
+impl PlaygroundRequest {
+    pub fn new() -> PlaygroundRequest {
+        PlaygroundRequest {
+            backtrace: false,
+            channel: String::from("stable"),
+            code: String::from(""),
+            crateType: String::from("bin"),
+            edition: String::from("2018"),
+            mode: String::from("debug"),
+            tests: false,
+        }
+    }
+}
 
 pub fn get_start_message() -> String {
     concat!("Welcome! Let's go deeper to Rust.\n\n",
@@ -92,43 +139,19 @@ pub fn set_build_type(_user_id: UserId, data: String) -> String {
     "Wrong build type set.".to_string()
 }
 
-fn load_users_data(_file_path: String) -> Users
+pub fn load_users_data(_file_path: String) -> Users
 {
     Mutex::new(HashMap::new())
 }
 
-#[allow(non_snake_case)]
-#[derive(Serialize)]
-struct PlaygroundRequest {
-    backtrace: bool,
-    channel: String,
-    code: String,
-    crateType: String,
-    edition: String,
-    mode: String,
-    tests: bool,
-}
-
-#[derive(Deserialize)]
-struct PlaygroundResponse {
-    success: bool,
-    stdout: String,
-    stderr: String,
-}
-
-pub async fn create_response(_user_id: UserId, data: &str) -> Result<String> {
+pub async fn create_response(user_id: UserId, users: &Users, data: &str) -> Result<String> {
     let connector = HttpsConnector::new();
     let client = hyper::Client::builder().build(connector);
 
-    let playground_request = serde_json::to_string(&PlaygroundRequest {
-        backtrace: false,
-        channel: String::from("stable"),
-        code: data.to_string(),
-        crateType: String::from("bin"),
-        edition: String::from("2018"),
-        mode: String::from("debug"),
-        tests: false,
-    })?;
+    let mut user_data = get_user_data(user_id, users);
+    user_data.code = data.to_string();
+
+    let playground_request = serde_json::to_string(&user_data)?;
 
     let req = hyper::Request::post("https://play.rust-lang.org/execute")
         .header("content-type", "application/json")
