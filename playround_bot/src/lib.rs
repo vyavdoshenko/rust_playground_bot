@@ -1,10 +1,10 @@
+use std::collections::HashMap;
 use std::str;
+use std::sync::Mutex;
 
 use hyper_rustls::HttpsConnector;
 use serde::{Deserialize, Serialize};
 use telegram_bot::*;
-use std::collections::HashMap;
-use std::sync::Mutex;
 
 // Private section
 
@@ -20,7 +20,7 @@ struct PlaygroundResponse {
 fn get_user_data(user_id: UserId, users: &Users) -> PlaygroundRequest {
     let locker = users.lock().unwrap();
     if locker.contains_key(&user_id) {
-        return locker.get(&user_id).unwrap().clone()
+        return locker.get(&user_id).unwrap().clone();
     }
 
     PlaygroundRequest::new()
@@ -103,62 +103,48 @@ pub fn get_info(user_id: UserId, users: &Users) -> String {
 }
 
 pub fn set_version(_user_id: UserId, data: String) -> String {
-    if data.to_lowercase() == "stable" {
-        return "Stable version set.".to_string()
-    } else if data.to_lowercase() == "beta" {
-        return "Beta version set.".to_string()
-    } else if data.to_lowercase() == "nightly" {
-        return "Nightly version set.".to_string()
+    if data.to_lowercase() == "stable" ||
+        data.to_lowercase() == "beta" ||
+        data.to_lowercase() == "nightly" {
+        data.to_lowercase().clone().push_str(" version set.")
     }
 
     "Wrong version set.".to_string()
 }
 
 pub fn set_mode(_user_id: UserId, data: String) -> String {
-    if data.to_lowercase() == "debug" {
-        return "Debug mode set.".to_string()
-    } else if data.to_lowercase() == "release" {
-        return "Release mode set.".to_string()
+    if data.to_lowercase() == "debug" || data.to_lowercase() == "release" {
+        data.to_lowercase().clone().push_str(" mode set.")
     }
 
     "Wrong mode set.".to_string()
 }
 
 pub fn set_edition(_user_id: UserId, data: String) -> String {
-    if data == "2018" {
-        return "2018 edition set.".to_string()
-    } else if data == "2015" {
-        return "2015 edition set.".to_string()
+    if data == "2018" || data == "2015" {
+        data.clone().push_str(" edition set.")
     }
 
     "Wrong edition set.".to_string()
 }
 
 pub fn set_backtrace(_user_id: UserId, data: String) -> String {
-    if data.to_lowercase() == "disabled" {
-        return "Disabled backtrace set.".to_string()
-    } else if data.to_lowercase() == "enabled" {
-        return "Enabled backtrace set.".to_string()
+    if data.to_lowercase() == "disabled" || data.to_lowercase() == "enabled" {
+        data.to_lowercase().clone().push_str(" backtrace set.")
     }
 
     "Wrong backtrace set.".to_string()
 }
 
 pub fn set_build_type(_user_id: UserId, data: String) -> String {
-    if data.to_lowercase() == "run" {
-        return "run build type set.".to_string()
-    } else if data.to_lowercase() == "build" {
-        return "build build type set.".to_string()
-    } else if data.to_lowercase() == "test" {
-        return "test build type set.".to_string()
-    } else if data.to_lowercase() == "asm" {
-        return "asm build type set.".to_string()
-    } else if data.to_lowercase() == "llvm ir" {
-        return "llvm ir build type set.".to_string()
-    } else if data.to_lowercase() == "mir" {
-        return "mir build type set.".to_string()
-    } else if data.to_lowercase() == "wasm" {
-        return "wasm build type set.".to_string()
+    if data.to_lowercase() == "run" ||
+        data.to_lowercase() == "build" ||
+        data.to_lowercase() == "test" ||
+        data.to_lowercase() == "asm" ||
+        data.to_lowercase() == "llvm ir" ||
+        data.to_lowercase() == "mir" ||
+        data.to_lowercase() == "wasm" {
+        data.to_lowercase().clone().push_str(" build type set.")
     }
 
     "Wrong build type set.".to_string()
