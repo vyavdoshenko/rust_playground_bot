@@ -117,7 +117,7 @@ pub fn set_channel(user_id: UserId, users: &mut Users, data: String) -> String {
         value
     }
 
-    "Wrong version set.".to_string()
+    "Wrong channel set.".to_string()
 }
 
 pub fn set_mode(user_id: UserId, users: &mut Users, data: String) -> String {
