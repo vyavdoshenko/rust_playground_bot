@@ -9,7 +9,7 @@ use playround_bot::*;
 async fn main() {
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
     let api = Api::new(token);
-    let users = load_users_data("".to_string());
+    let mut users = load_users_data("".to_string());
 
     // Fetch new updates via long poll method
     let mut stream = api.stream();
@@ -31,16 +31,16 @@ async fn main() {
                                     get_github_url()
                                 } else if data == "/info" {
                                     get_info(user.id, &users)
-                                } else if data.starts_with("/version ") {
-                                    set_version(user.id, data.split("/version ").collect())
-                                } else if data.starts_with("/mode ") {
-                                    set_mode(user.id, data.split("/mode ").collect())
-                                } else if data.starts_with("/edition ") {
-                                    set_edition(user.id, data.split("/edition ").collect())
-                                } else if data.starts_with("/backtrace ") {
-                                    set_backtrace(user.id, data.split("/backtrace ").collect())
-                                } else if data.starts_with("/cargo ") {
-                                    set_build_type(user.id, data.split("/cargo ").collect())
+                                } else if data.starts_with("/set_channel ") {
+                                    set_channel(user.id, &mut users, data.split("/set_channel ").collect())
+                                } else if data.starts_with("/set_mode ") {
+                                    set_mode(user.id, &mut users, data.split("/set_mode ").collect())
+                                } else if data.starts_with("/set_edition ") {
+                                    set_edition(user.id, &mut users, data.split("/set_edition ").collect())
+                                } else if data.starts_with("/set_backtrace ") {
+                                    set_backtrace(user.id, &mut users, data.split("/set_backtrace ").collect())
+                                } else if data.starts_with("/set_build_type ") {
+                                    set_build_type(user.id, &mut users, data.split("/set_build_type ").collect())
                                 } else {
                                     match create_response(user.id, &users, data).await {
                                         Err(why) => {

@@ -18,9 +18,9 @@ struct PlaygroundResponse {
 }
 
 fn get_user_data(user_id: UserId, users: &Users) -> PlaygroundRequest {
-    let locker = users.lock().unwrap();
-    if locker.contains_key(&user_id) {
-        return locker.get(&user_id).unwrap().clone();
+    let guard = users.lock().unwrap();
+    if guard.contains_key(&user_id) {
+        return guard.get(&user_id).unwrap().clone();
     }
 
     PlaygroundRequest::new()
@@ -102,48 +102,96 @@ pub fn get_info(user_id: UserId, users: &Users) -> String {
     value
 }
 
-pub fn set_version(_user_id: UserId, data: String) -> String {
+pub fn set_channel(user_id: UserId, users: &mut Users, data: String) -> String {
     if data.to_lowercase() == "stable" ||
         data.to_lowercase() == "beta" ||
         data.to_lowercase() == "nightly" {
-        data.to_lowercase().clone().push_str(" version set.")
+        let mut user_data = get_user_data(user_id, users);
+
+        let value = data.clone().push_str(" channel set.");
+        user_data.channel = data;
+
+        let mut guard = users.lock().unwrap();
+        guard.insert(user_id, user_data);
+
+        value
     }
 
     "Wrong version set.".to_string()
 }
 
-pub fn set_mode(_user_id: UserId, data: String) -> String {
+pub fn set_mode(user_id: UserId, users: &mut Users, data: String) -> String {
     if data.to_lowercase() == "debug" || data.to_lowercase() == "release" {
-        data.to_lowercase().clone().push_str(" mode set.")
+        let mut user_data = get_user_data(user_id, users);
+
+        let value = data.clone().push_str(" mode set.");
+        user_data.mode = data;
+
+        let mut guard = users.lock().unwrap();
+        guard.insert(user_id, user_data);
+
+        value
     }
 
     "Wrong mode set.".to_string()
 }
 
-pub fn set_edition(_user_id: UserId, data: String) -> String {
+pub fn set_edition(user_id: UserId, users: &mut Users, data: String) -> String {
     if data == "2018" || data == "2015" {
-        data.clone().push_str(" edition set.")
+        let mut user_data = get_user_data(user_id, users);
+
+        let value = data.clone().push_str(" edition set.");
+        user_data.edition = data;
+
+        let mut guard = users.lock().unwrap();
+        guard.insert(user_id, user_data);
+
+        value
     }
 
     "Wrong edition set.".to_string()
 }
 
-pub fn set_backtrace(_user_id: UserId, data: String) -> String {
+pub fn set_backtrace(user_id: UserId, users: &mut Users, data: String) -> String {
     if data.to_lowercase() == "disabled" || data.to_lowercase() == "enabled" {
+        let mut user_data = get_user_data(user_id, users);
+
+        if data.to_lowercase() == "disabled" {
+            user_data.backtrace = false;
+        } else {
+            user_data.backtrace = true;
+        }
+
+        let mut guard = users.lock().unwrap();
+        guard.insert(user_id, user_data);
+
         data.to_lowercase().clone().push_str(" backtrace set.")
     }
 
     "Wrong backtrace set.".to_string()
 }
 
-pub fn set_build_type(_user_id: UserId, data: String) -> String {
+pub fn set_build_type(user_id: UserId, users: &mut Users, data: String) -> String {
     if data.to_lowercase() == "run" ||
         data.to_lowercase() == "build" ||
-        data.to_lowercase() == "test" ||
-        data.to_lowercase() == "asm" ||
-        data.to_lowercase() == "llvm ir" ||
-        data.to_lowercase() == "mir" ||
-        data.to_lowercase() == "wasm" {
+        data.to_lowercase() == "test" {
+        let mut user_data = get_user_data(user_id, users);
+
+        if data.to_lowercase() == "test" {
+            user_data.tests = true;
+        } else {
+            user_data.tests = false;
+        }
+
+        if data.to_lowercase() == "run" {
+            user_data.crateType = "bin".to_string();
+        } else {
+            user_data.crateType = "lib".to_string();
+        }
+
+        let mut guard = users.lock().unwrap();
+        guard.insert(user_id, user_data);
+
         data.to_lowercase().clone().push_str(" build type set.")
     }
 
