@@ -1,20 +1,23 @@
 use std::env;
-
 use futures::StreamExt;
 use telegram_bot::*;
-
 use playround_bot::*;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 #[tokio::main]
 async fn main() {
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN is not set");
     let file_path = env::var("FILE_PATH").expect("FILE_PATH is not set");
     let api = Api::new(token);
-    let mut users = load_users_data(file_path);
+    let mut users = load_users_data(&file_path);
+
+    let term = Arc::new(AtomicBool::new(false));
+    signal_hook::flag::register(signal_hook::SIGTERM, Arc::clone(&term)).expect("Signal handler set error");
 
     // Fetch new updates via long poll method
     let mut stream = api.stream();
-    loop {
+    while !term.load(Ordering::Relaxed) {
         if let Some(update) = stream.next().await {
             // If the received update contains a new message...
             match update {
@@ -69,4 +72,6 @@ async fn main() {
             }
         }
     }
+
+    save_users_data(&file_path, &users);
 }

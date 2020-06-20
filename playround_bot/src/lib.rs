@@ -217,7 +217,7 @@ pub fn set_build_type(user_id: UserId, users: &mut Users, data: String) -> Strin
     "Error. Wrong build type.".to_string()
 }
 
-pub fn load_users_data(file_path: String) -> Users
+pub fn load_users_data(file_path: &String) -> Users
 {
     match File::open(file_path) {
         Err(_) => {
@@ -238,8 +238,8 @@ pub fn load_users_data(file_path: String) -> Users
     }
 }
 
-pub fn save_users_data(file_path: String, users : &Users) {
-    match File::open(&file_path) {
+pub fn save_users_data(file_path: &String, users : &Users) {
+    match File::create(&file_path) {
         Err(_) => {
             eprintln!("Can't open file for save: {:?}", file_path);
         }

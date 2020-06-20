@@ -706,6 +706,7 @@ dependencies = [
  "hyper-rustls",
  "serde",
  "serde_json",
+ "signal-hook",
  "telegram-bot",
  "tokio",
 ]
@@ -1045,6 +1046,16 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "signal-hook"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "604508c1418b99dfe1925ca9224829bb2a8a9a04dda655cc01fcad46f4ab05ed"
+dependencies = [
+ "libc",
+ "signal-hook-registry",
 ]
 
 [[package]]
