@@ -5,6 +5,9 @@ use std::sync::Mutex;
 use hyper_rustls::HttpsConnector;
 use serde::{Deserialize, Serialize};
 use telegram_bot::*;
+use std::io::{BufReader, BufWriter};
+use std::fs::File;
+use std::ops::Deref;
 
 // Private section
 
@@ -31,7 +34,7 @@ fn get_user_data(user_id: UserId, users: &Users) -> PlaygroundRequest {
 pub type Users = Mutex<HashMap<UserId, PlaygroundRequest>>;
 
 #[allow(non_snake_case)]
-#[derive(Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct PlaygroundRequest {
     backtrace: bool,
     channel: String,
@@ -91,6 +94,9 @@ pub fn get_info(user_id: UserId, users: &Users) -> String {
 
     value.push_str("\nMode: ");
     value.push_str(&data.mode);
+
+    value.push_str("\nCrate type: ");
+    value.push_str(&data.crateType);
 
     value.push_str("\nTests: ");
     if data.tests {
@@ -211,9 +217,44 @@ pub fn set_build_type(user_id: UserId, users: &mut Users, data: String) -> Strin
     "Error. Wrong build type.".to_string()
 }
 
-pub fn load_users_data(_file_path: String) -> Users
+pub fn load_users_data(file_path: String) -> Users
 {
-    Mutex::new(HashMap::new())
+    match File::open(file_path) {
+        Err(_) => {
+            Mutex::new(HashMap::new())
+        }
+        Ok(file) => {
+            let reader = BufReader::new(file);
+
+            match serde_json::from_reader(reader) {
+                Err(_) => {
+                    Mutex::new(HashMap::new())
+                }
+                Ok(all) => {
+                    Mutex::new(all)
+                }
+            }
+        }
+    }
+}
+
+pub fn save_users_data(file_path: String, users : &Users) {
+    match File::open(&file_path) {
+        Err(_) => {
+            eprintln!("Can't open file for save: {:?}", file_path);
+        }
+        Ok(file) => {
+            let writer = BufWriter::new(file);
+            let guard = users.lock().unwrap();
+            match serde_json::to_writer(writer, guard.deref()) {
+                Err(_) => {
+                    eprintln!("Can't save file: {:?}", file_path);
+                }
+                Ok(_) => {
+                }
+            }
+        }
+    }
 }
 
 pub async fn create_response(user_id: UserId, users: &Users, data: &str) -> Result<String> {

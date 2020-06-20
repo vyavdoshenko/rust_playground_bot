@@ -7,9 +7,10 @@ use playround_bot::*;
 
 #[tokio::main]
 async fn main() {
-    let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
+    let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN is not set");
+    let file_path = env::var("FILE_PATH").expect("FILE_PATH is not set");
     let api = Api::new(token);
-    let mut users = load_users_data("".to_string());
+    let mut users = load_users_data(file_path);
 
     // Fetch new updates via long poll method
     let mut stream = api.stream();
