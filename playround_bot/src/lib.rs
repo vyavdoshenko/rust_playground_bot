@@ -103,56 +103,65 @@ pub fn get_info(user_id: UserId, users: &Users) -> String {
 }
 
 pub fn set_channel(user_id: UserId, users: &mut Users, data: String) -> String {
+    println!("Set channel {:?} for user {:?}", data, user_id);
     if data.to_lowercase() == "stable" ||
         data.to_lowercase() == "beta" ||
         data.to_lowercase() == "nightly" {
         let mut user_data = get_user_data(user_id, users);
 
-        let value = data.clone().push_str(" channel set.");
+        let mut value = "".to_string();
+        value.push_str("Channel is ");
+        value.push_str(&data);
+
         user_data.channel = data;
 
         let mut guard = users.lock().unwrap();
         guard.insert(user_id, user_data);
 
-        value
+        return value;
     }
 
-    "Wrong channel set.".to_string()
+    "Error. Wrong channel.".to_string()
 }
 
 pub fn set_mode(user_id: UserId, users: &mut Users, data: String) -> String {
+    println!("Set mode {:?} for user {:?}", data, user_id);
     if data.to_lowercase() == "debug" || data.to_lowercase() == "release" {
-        let mut user_data = get_user_data(user_id, users);
+        let user_data = get_user_data(user_id, users);
 
-        let value = data.clone().push_str(" mode set.");
-        user_data.mode = data;
+        let mut value = "".to_string();
+        value.push_str("Mode is ");
+        value.push_str(&data);
 
         let mut guard = users.lock().unwrap();
         guard.insert(user_id, user_data);
 
-        value
+        return value;
     }
 
-    "Wrong mode set.".to_string()
+    "Error. Wrong mode.".to_string()
 }
 
 pub fn set_edition(user_id: UserId, users: &mut Users, data: String) -> String {
+    println!("Set edition {:?} for user {:?}", data, user_id);
     if data == "2018" || data == "2015" {
-        let mut user_data = get_user_data(user_id, users);
+        let user_data = get_user_data(user_id, users);
 
-        let value = data.clone().push_str(" edition set.");
-        user_data.edition = data;
+        let mut value = "".to_string();
+        value.push_str("Edition is ");
+        value.push_str(&data);
 
         let mut guard = users.lock().unwrap();
         guard.insert(user_id, user_data);
 
-        value
+        return value;
     }
 
-    "Wrong edition set.".to_string()
+    "Error. Wrong edition.".to_string()
 }
 
 pub fn set_backtrace(user_id: UserId, users: &mut Users, data: String) -> String {
+    println!("Set backtrace {:?} for user {:?}", data, user_id);
     if data.to_lowercase() == "disabled" || data.to_lowercase() == "enabled" {
         let mut user_data = get_user_data(user_id, users);
 
@@ -165,13 +174,17 @@ pub fn set_backtrace(user_id: UserId, users: &mut Users, data: String) -> String
         let mut guard = users.lock().unwrap();
         guard.insert(user_id, user_data);
 
-        data.to_lowercase().clone().push_str(" backtrace set.")
+        let mut value = "".to_string();
+        value.push_str("Backtrace ");
+        value.push_str(&data);
+        return value;
     }
 
-    "Wrong backtrace set.".to_string()
+    "Error. Wrong backtrace.".to_string()
 }
 
 pub fn set_build_type(user_id: UserId, users: &mut Users, data: String) -> String {
+    println!("Set build type {:?} for user {:?}", data, user_id);
     if data.to_lowercase() == "run" ||
         data.to_lowercase() == "build" ||
         data.to_lowercase() == "test" {
@@ -189,13 +202,13 @@ pub fn set_build_type(user_id: UserId, users: &mut Users, data: String) -> Strin
             user_data.crateType = "lib".to_string();
         }
 
-        let mut guard = users.lock().unwrap();
-        guard.insert(user_id, user_data);
-
-        data.to_lowercase().clone().push_str(" build type set.")
+        let mut value = "".to_string();
+        value.push_str(&data);
+        value.push_str(" build type set.");
+        return value;
     }
 
-    "Wrong build type set.".to_string()
+    "Error. Wrong build type.".to_string()
 }
 
 pub fn load_users_data(_file_path: String) -> Users
