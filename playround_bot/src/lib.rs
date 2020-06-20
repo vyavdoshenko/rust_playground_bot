@@ -208,6 +208,9 @@ pub fn set_build_type(user_id: UserId, users: &mut Users, data: String) -> Strin
             user_data.crateType = "lib".to_string();
         }
 
+        let mut guard = users.lock().unwrap();
+        guard.insert(user_id, user_data);
+
         let mut value = "".to_string();
         value.push_str(&data);
         value.push_str(" build type set.");
