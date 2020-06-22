@@ -1,13 +1,13 @@
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
+use std::ops::Deref;
 use std::str;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use hyper_rustls::HttpsConnector;
 use serde::{Deserialize, Serialize};
 use telegram_bot::*;
-use std::io::{BufReader, BufWriter};
-use std::fs::File;
-use std::ops::Deref;
 
 // Private section
 
@@ -20,7 +20,7 @@ struct PlaygroundResponse {
     stderr: String,
 }
 
-fn get_user_data(user_id: UserId, users: &Users) -> PlaygroundRequest {
+fn get_user_data(user_id: UserId, users: Users) -> PlaygroundRequest {
     let guard = users.lock().unwrap();
     if guard.contains_key(&user_id) {
         return guard.get(&user_id).unwrap().clone();
@@ -31,7 +31,7 @@ fn get_user_data(user_id: UserId, users: &Users) -> PlaygroundRequest {
 
 // Public section
 
-pub type Users = Mutex<HashMap<UserId, PlaygroundRequest>>;
+pub type Users = Arc<Mutex<HashMap<UserId, PlaygroundRequest>>>;
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Clone)]
@@ -76,7 +76,7 @@ pub fn get_github_url() -> String {
     "https://github.com/vyavdoshenko/rust_playground_bot".to_string()
 }
 
-pub fn get_info(user_id: UserId, users: &Users) -> String {
+pub fn get_info(user_id: UserId, users: Users) -> String {
     let data = get_user_data(user_id, users);
 
     let mut value = "Backtrace: ".to_string();
@@ -108,12 +108,12 @@ pub fn get_info(user_id: UserId, users: &Users) -> String {
     value
 }
 
-pub fn set_channel(user_id: UserId, users: &mut Users, data: String) -> String {
+pub fn set_channel(user_id: UserId, users: Users, data: String) -> String {
     println!("Set channel {:?} for user {:?}", data, user_id);
     if data.to_lowercase() == "stable" ||
         data.to_lowercase() == "beta" ||
         data.to_lowercase() == "nightly" {
-        let mut user_data = get_user_data(user_id, users);
+        let mut user_data = get_user_data(user_id, users.clone());
 
         let mut value = "".to_string();
         value.push_str("Channel is ");
@@ -130,10 +130,10 @@ pub fn set_channel(user_id: UserId, users: &mut Users, data: String) -> String {
     "Error. Wrong channel.".to_string()
 }
 
-pub fn set_mode(user_id: UserId, users: &mut Users, data: String) -> String {
+pub fn set_mode(user_id: UserId, users: Users, data: String) -> String {
     println!("Set mode {:?} for user {:?}", data, user_id);
     if data.to_lowercase() == "debug" || data.to_lowercase() == "release" {
-        let user_data = get_user_data(user_id, users);
+        let user_data = get_user_data(user_id, users.clone());
 
         let mut value = "".to_string();
         value.push_str("Mode is ");
@@ -148,10 +148,10 @@ pub fn set_mode(user_id: UserId, users: &mut Users, data: String) -> String {
     "Error. Wrong mode.".to_string()
 }
 
-pub fn set_edition(user_id: UserId, users: &mut Users, data: String) -> String {
+pub fn set_edition(user_id: UserId, users: Users, data: String) -> String {
     println!("Set edition {:?} for user {:?}", data, user_id);
     if data == "2018" || data == "2015" {
-        let user_data = get_user_data(user_id, users);
+        let user_data = get_user_data(user_id, users.clone());
 
         let mut value = "".to_string();
         value.push_str("Edition is ");
@@ -166,10 +166,10 @@ pub fn set_edition(user_id: UserId, users: &mut Users, data: String) -> String {
     "Error. Wrong edition.".to_string()
 }
 
-pub fn set_backtrace(user_id: UserId, users: &mut Users, data: String) -> String {
+pub fn set_backtrace(user_id: UserId, users: Users, data: String) -> String {
     println!("Set backtrace {:?} for user {:?}", data, user_id);
     if data.to_lowercase() == "disabled" || data.to_lowercase() == "enabled" {
-        let mut user_data = get_user_data(user_id, users);
+        let mut user_data = get_user_data(user_id, users.clone());
 
         if data.to_lowercase() == "disabled" {
             user_data.backtrace = false;
@@ -189,12 +189,12 @@ pub fn set_backtrace(user_id: UserId, users: &mut Users, data: String) -> String
     "Error. Wrong backtrace.".to_string()
 }
 
-pub fn set_build_type(user_id: UserId, users: &mut Users, data: String) -> String {
+pub fn set_build_type(user_id: UserId, users: Users, data: String) -> String {
     println!("Set build type {:?} for user {:?}", data, user_id);
     if data.to_lowercase() == "run" ||
         data.to_lowercase() == "build" ||
         data.to_lowercase() == "test" {
-        let mut user_data = get_user_data(user_id, users);
+        let mut user_data = get_user_data(user_id, users.clone());
 
         if data.to_lowercase() == "test" {
             user_data.tests = true;
@@ -224,24 +224,24 @@ pub fn load_users_data(file_path: &String) -> Users
 {
     match File::open(file_path) {
         Err(_) => {
-            Mutex::new(HashMap::new())
+            Arc::new(Mutex::new(HashMap::new()))
         }
         Ok(file) => {
             let reader = BufReader::new(file);
 
             match serde_json::from_reader(reader) {
                 Err(_) => {
-                    Mutex::new(HashMap::new())
+                    Arc::new(Mutex::new(HashMap::new()))
                 }
                 Ok(all) => {
-                    Mutex::new(all)
+                    Arc::new(Mutex::new(all))
                 }
             }
         }
     }
 }
 
-pub fn save_users_data(file_path: &String, users : &Users) {
+pub fn save_users_data(file_path: &String, users: Users) {
     match File::create(&file_path) {
         Err(_) => {
             eprintln!("Can't open file for save: {:?}", file_path);
@@ -253,14 +253,13 @@ pub fn save_users_data(file_path: &String, users : &Users) {
                 Err(_) => {
                     eprintln!("Can't save file: {:?}", file_path);
                 }
-                Ok(_) => {
-                }
+                Ok(_) => {}
             }
         }
     }
 }
 
-pub async fn create_response(user_id: UserId, users: &Users, data: &str) -> Result<String> {
+pub async fn create_response(user_id: UserId, users: Users, data: &str) -> Result<String> {
     let connector = HttpsConnector::new();
     let client = hyper::Client::builder().build(connector);
 
