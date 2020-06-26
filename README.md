@@ -24,29 +24,29 @@ Get link to this repository.
 /github
 ```
 
-Set version. Default is stable.
+Set channel. Default is stable.
 ```
-/version stable|beta|nightly
+/set_channel stable|beta|nightly
 ```
 
 Set mode. Default is debug.
 ```
-/mode debug|release
+/set_mode debug|release
 ```
 
 Set edition. Default is 2018.
 ```
-/edition 2018|2015
+/set_edition 2018|2015
 ```
 
 Set backtrace. Default is disabled.
 ```
-/backtrace disabled|enabled
+/set_backtrace disabled|enabled
 ```
 
 What do you want to do? Default is run.
 ```
-/cargo run|build|test|asm|llvm ir|mir|wasm
+/set_build_type run|build|test
 ```
 
 Get settings information.
@@ -58,36 +58,15 @@ Get settings information.
 
 Build and run the code, showing the output. Equivalent to cargo run.
 ```
-/cargo run
+/set_build_type run
 ```
 
 Build the code without running it. Equivalent to cargo build.
 ```
-/cargo build
+/set_build_type build
 ```
 
 Build the code and run all the tests. Equivalent to cargo test.
 ```
-/cargo test
-```
-
-Build and show the resulting assembly code.
-```
-/cargo asm
-```
-
-Build and show the resulting LLVM IR, LLVM’s intermediate representation.
-```
-/cargo llvm ir
-```
-
-Build and show the resulting MIR, Rust’s intermediate representation.
-```
-/cargo mir
-```
-
-Build a WebAssembly module for web browsers, in the .WAT textual representation.
-Note: WASM currently requires using the Nightly channel, selecting this option will switch to Nightly.
-```
-/cargo wasm
+/set_build_type test
 ```
