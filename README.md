@@ -70,3 +70,16 @@ Build the code and run all the tests. Equivalent to cargo test.
 ```
 /set_build_type test
 ```
+
+## Docker build & run:
+
+Build the docker container.
+```
+$ cd playground_bot
+$ docker build -t playground_bot .
+```
+
+Run the application.
+```
+$ docker run --env TELEGRAM_BOT_TOKEN=1234567:YOUR_BOT_TOKEN --rm -it playground_bot
+```
