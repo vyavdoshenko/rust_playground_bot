@@ -42,4 +42,6 @@ RUN chown -R playground:playground /home/playground
 
 USER playground
 
+ENV FILE_PATH=./users.json
+
 CMD ["./playground_bot"]
