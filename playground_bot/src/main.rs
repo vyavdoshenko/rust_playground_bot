@@ -12,7 +12,7 @@ use futures::{
 };
 use telegram_bot::*;
 
-use playround_bot::*;
+use playground_bot::*;
 
 #[tokio::main]
 async fn main() {
