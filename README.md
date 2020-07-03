@@ -81,5 +81,5 @@ $ docker build -t playground_bot .
 
 Run the application.
 ```
-$ docker run --env TELEGRAM_BOT_TOKEN=1234567:YOUR_BOT_TOKEN --rm -it playground_bot
+$ docker run -d --env TELEGRAM_BOT_TOKEN=1234567:YOUR_BOT_TOKEN --rm -it playground_bot
 ```
