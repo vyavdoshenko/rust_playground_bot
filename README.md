@@ -73,13 +73,13 @@ Build the code and run all the tests. Equivalent to cargo test.
 
 ## Docker build & run:
 
-Build the docker container.
+Build the docker container:
 ```
 $ cd playground_bot
 $ docker build -t playground_bot .
 ```
 
-Run the application.
+Run the application:
 ```
 $ docker run -d --env TELEGRAM_BOT_TOKEN=1234567:YOUR_BOT_TOKEN --rm -it playground_bot
 ```
@@ -87,19 +87,26 @@ Take attention that 1234567:YOUR_BOT_TOKEN should be replaced with your bot ID. 
 
 ## TODO:
 
-The bot can process only execute commands from following request: https://play.rust-lang.org/execute
+The bot can process only execute commands from the following request: https://play.rust-lang.org/execute
+
 run/build/test
 
-I plan to add compile commands in future if it needed: https://play.rust-lang.org/compile
-Please contact me to make request this feature.
+I plan to add compile commands in the future if needed: https://play.rust-lang.org/compile
+
+Please contact me to make a request for this feature.
+
 ASM/LLVM IR/MIR/WASM
 
 ## Contribution:
+
 Feel free to create pull request or contact me to discuss for add/modify code or something else via GitHub or email: v.yavdoshenko at gmail.com
 
 ## Live bot:
+
 You can try the latest version of this bot here:
+
 https://telegram.me/rust_playground_bot
 
 ## DockerHub:
+
 https://hub.docker.com/r/yavdoshenko/rust_playground_bot
