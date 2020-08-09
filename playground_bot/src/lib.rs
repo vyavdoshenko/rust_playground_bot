@@ -3,8 +3,8 @@ use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::ops::Deref;
 use std::str;
-use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use async_std::task;
@@ -17,8 +17,10 @@ use telegram_bot::*;
 
 pub async fn signal_handler() {
     let term = Arc::new(AtomicBool::new(false));
-    signal_hook::flag::register(signal_hook::SIGTERM, Arc::clone(&term)).expect("SIGTERM signal handler set error");
-    signal_hook::flag::register(signal_hook::SIGINT, Arc::clone(&term)).expect("SIGINT signal handler set error");
+    signal_hook::flag::register(signal_hook::SIGTERM, Arc::clone(&term))
+        .expect("SIGTERM signal handler set error");
+    signal_hook::flag::register(signal_hook::SIGINT, Arc::clone(&term))
+        .expect("SIGINT signal handler set error");
 
     while !term.load(Ordering::Relaxed) {
         task::sleep(Duration::from_secs(1)).await;
@@ -50,35 +52,50 @@ pub async fn commands_handler(token: String, users: Users) {
                                 } else if data == "/info" {
                                     get_info(user.id, users.clone())
                                 } else if data.starts_with("/set_channel ") {
-                                    set_channel(user.id, users.clone(), data.split("/set_channel ").collect())
+                                    set_channel(
+                                        user.id,
+                                        users.clone(),
+                                        data.split("/set_channel ").collect(),
+                                    )
                                 } else if data.starts_with("/set_mode ") {
-                                    set_mode(user.id, users.clone(), data.split("/set_mode ").collect())
+                                    set_mode(
+                                        user.id,
+                                        users.clone(),
+                                        data.split("/set_mode ").collect(),
+                                    )
                                 } else if data.starts_with("/set_edition ") {
-                                    set_edition(user.id, users.clone(), data.split("/set_edition ").collect())
+                                    set_edition(
+                                        user.id,
+                                        users.clone(),
+                                        data.split("/set_edition ").collect(),
+                                    )
                                 } else if data.starts_with("/set_backtrace ") {
-                                    set_backtrace(user.id, users.clone(), data.split("/set_backtrace ").collect())
+                                    set_backtrace(
+                                        user.id,
+                                        users.clone(),
+                                        data.split("/set_backtrace ").collect(),
+                                    )
                                 } else if data.starts_with("/set_build_type ") {
-                                    set_build_type(user.id, users.clone(), data.split("/set_build_type ").collect())
+                                    set_build_type(
+                                        user.id,
+                                        users.clone(),
+                                        data.split("/set_build_type ").collect(),
+                                    )
                                 } else {
                                     match create_response(user.id, users.clone(), data).await {
                                         Err(why) => {
                                             eprintln!("Create response error: {:?}", why);
-                                            "Create response error, sorry for inconvenience".to_string()
+                                            "Create response error, sorry for inconvenience"
+                                                .to_string()
                                         }
-                                        Ok(response_msg) => {
-                                            response_msg
-                                        }
+                                        Ok(response_msg) => response_msg,
                                     }
                                 }
                             };
 
                             match api.send(SendMessage::new(message.chat, msg)).await {
-                                Err(why) => {
-                                    eprintln!("Send message error: {:?}", why)
-                                }
-                                Ok(_) => {
-                                    ()
-                                }
+                                Err(why) => eprintln!("Send message error: {:?}", why),
+                                Ok(_) => (),
                             }
                         }
                     }
@@ -114,22 +131,15 @@ impl PlaygroundRequest {
     }
 }
 
-pub fn load_users_data(file_path: &String) -> Users
-{
+pub fn load_users_data(file_path: &String) -> Users {
     match File::open(file_path) {
-        Err(_) => {
-            Arc::new(Mutex::new(HashMap::new()))
-        }
+        Err(_) => Arc::new(Mutex::new(HashMap::new())),
         Ok(file) => {
             let reader = BufReader::new(file);
 
             match serde_json::from_reader(reader) {
-                Err(_) => {
-                    Arc::new(Mutex::new(HashMap::new()))
-                }
-                Ok(all) => {
-                    Arc::new(Mutex::new(all))
-                }
+                Err(_) => Arc::new(Mutex::new(HashMap::new())),
+                Ok(all) => Arc::new(Mutex::new(all)),
             }
         }
     }
@@ -175,12 +185,15 @@ fn get_user_data(user_id: UserId, users: Users) -> PlaygroundRequest {
 }
 
 fn get_start_message() -> String {
-    concat!("Welcome! Let's go deeper to Rust.\n\n",
-    "It's Rust Playground Bot.\n",
-    "You can check some pieces of your Rust code, sending it to me.\n",
-    "I will check it using Rust playground: https://play.rust-lang.org/\n\n",
-    "This Bot is an open-source project.\n",
-    "https://github.com/vyavdoshenko/rust_playground_bot").to_string()
+    concat!(
+        "Welcome! Let's go deeper to Rust.\n\n",
+        "It's Rust Playground Bot.\n",
+        "You can check some pieces of your Rust code, sending it to me.\n",
+        "I will check it using Rust playground: https://play.rust-lang.org/\n\n",
+        "This Bot is an open-source project.\n",
+        "https://github.com/vyavdoshenko/rust_playground_bot"
+    )
+    .to_string()
 }
 
 fn get_playground_url() -> String {
@@ -225,9 +238,10 @@ fn get_info(user_id: UserId, users: Users) -> String {
 
 fn set_channel(user_id: UserId, users: Users, data: String) -> String {
     println!("Set channel {:?} for user {:?}", data, user_id);
-    if data.to_lowercase() == "stable" ||
-        data.to_lowercase() == "beta" ||
-        data.to_lowercase() == "nightly" {
+    if data.to_lowercase() == "stable"
+        || data.to_lowercase() == "beta"
+        || data.to_lowercase() == "nightly"
+    {
         let mut user_data = get_user_data(user_id, users.clone());
 
         let mut value = "".to_string();
@@ -306,9 +320,10 @@ fn set_backtrace(user_id: UserId, users: Users, data: String) -> String {
 
 fn set_build_type(user_id: UserId, users: Users, data: String) -> String {
     println!("Set build type {:?} for user {:?}", data, user_id);
-    if data.to_lowercase() == "run" ||
-        data.to_lowercase() == "build" ||
-        data.to_lowercase() == "test" {
+    if data.to_lowercase() == "run"
+        || data.to_lowercase() == "build"
+        || data.to_lowercase() == "test"
+    {
         let mut user_data = get_user_data(user_id, users.clone());
 
         if data.to_lowercase() == "test" {

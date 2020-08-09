@@ -1,10 +1,6 @@
 use std::env;
 
-use futures::{
-    future::FutureExt,
-    pin_mut,
-    select,
-};
+use futures::{future::FutureExt, pin_mut, select};
 
 use playground_bot::*;
 
